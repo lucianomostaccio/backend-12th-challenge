@@ -1,7 +1,8 @@
 import passport from "passport";
 import local from "passport-local";
-import { getDaoUsers } from "../daos/users/users.dao.js"
+import { getDaoUsers } from "../daos/users/users.dao.js";
 import { isValidPassword } from "../utils/hashing.js";
+import Logger from "../utils/logger.js";
 
 const LocalStrategy = local.Strategy;
 
@@ -11,26 +12,26 @@ const initializePassport = () => {
     new LocalStrategy(
       { usernameField: "email" },
       async (username, password, done) => {
-        console.log(`Attempting to log in with email: ${username}`); // Log de intento de inicio de sesión
+        Logger.debug(`Attempting to log in with email: ${username}`); // Reemplazado por Logger.debug
         try {
           const usersDao = getDaoUsers();
           const user = await usersDao.readOne({ email: username });
-          console.log("User found by email:", user); // Log del usuario encontrado
+          Logger.debug("User found by email:", user); // Reemplazado por Logger.debug
 
           if (!user) {
-            console.log("User does not exist for email:", username);
+            Logger.warn("User does not exist for email:", username); // Reemplazado por Logger.warn
             return done(null, false, { message: "User does not exist" });
           }
 
           if (!isValidPassword(password, user.password)) {
-            console.log("Invalid password for user:", username);
+            Logger.warn("Invalid password for user:", username); // Reemplazado por Logger.warn
             return done(null, false, { message: "Invalid password" });
           }
 
-          console.log("Login successful for user:", username);
+          Logger.info("Login successful for user:", username); // Reemplazado por Logger.info
           return done(null, user);
         } catch (error) {
-          console.error("Error during login process:", error);
+          Logger.error("Error during login process:", error); // Reemplazado por Logger.error
           return done(error);
         }
       }
@@ -38,22 +39,20 @@ const initializePassport = () => {
   );
 
   passport.serializeUser((user, done) => {
-    console.log("serializing started user:",user)
+    Logger.debug("Serializing user:", user); // Reemplazado por Logger.debug
     // @ts-ignore
-    console.log(`Serializing user: ${user._id}`);
-    // @ts-ignore
-    done(null, user._id)
+    done(null, user._id);
   });
 
   passport.deserializeUser(async (id, done) => {
-    console.log(`Deserializing user with ID: ${id}`);
+    Logger.debug(`Deserializing user with ID: ${id}`); // Reemplazado por Logger.debug
     try {
       const usersDao = getDaoUsers();
       const user = await usersDao.readOne({ _id: id });
-      console.log("User found by ID during deserialization:", user);
+      Logger.debug("User found by ID during deserialization:", user); // Reemplazado por Logger.debug
       done(null, user);
     } catch (error) {
-      console.error("Error during deserialization:", error);
+      Logger.error("Error during deserialization:", error); // Reemplazado por Logger.error
       done(error);
     }
   });

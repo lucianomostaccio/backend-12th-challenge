@@ -1,3 +1,4 @@
+import Logger from "../../../utils/logger.js";
 import { toPOJO } from "../../utils.js";
 
 
@@ -18,7 +19,7 @@ export class UsersDaoMongoose {
     const userDoc = await this.usersModel
       .findOne(email)
       .lean();
-      console.log(userDoc)
+      Logger.debug(userDoc)
   
     // Populate orders if necessary
     // if (userDoc) {

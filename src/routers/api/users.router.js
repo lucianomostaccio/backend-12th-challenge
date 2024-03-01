@@ -11,6 +11,7 @@ import { getDaoUsers } from "../../daos/users/users.dao.js";
 import { createHash } from "../../utils/hashing.js";
 import { onlyLoggedInRest } from "../../middlewares/authorization.js";
 import { extractFile } from "../../middlewares/multer.js";
+import Logger from "../../utils/logger.js";
 
 // Create the router
 export const usersRouter = Router();
@@ -21,9 +22,10 @@ usersRouter.post("/", extractFile("profile_picture"), async (req, res) => {
   try {
     // Hash the password
     req.body.password = createHash(req.body.password);
-    console.log(req.body.password);
-
-    // console.log(req.file);
+    Logger.debug(
+      "Hashed password for new user registration:",
+      req.body.password
+    );
 
     // Set the profile picture path based on the uploaded file
     if (req.file) {
@@ -34,32 +36,12 @@ usersRouter.post("/", extractFile("profile_picture"), async (req, res) => {
     await postController(req, res);
   } catch (error) {
     // Handle errors
+    Logger.error("Error in user registration:", error);
     res.status(400).json({ status: "error", message: error.message });
   }
 });
 
-// Retrieve current user
-// usersRouter.get("/current", onlyLoggedInRest, async (req, res) => {
-//   try {
-//     // @ts-ignore
-//     const user = await getController({ email: req["user"].email }, { password: 0 });
-//     // Leverage the getController.
-//     // const userEmail = req.user.email;
-//     console.log("req user is:", user);
-//     res.status(200).json({ status: 'success', payload:user })
-//   } catch (error) {
-//     res.status(400).json({ status: "error", message: error.message });
-//   }
-// });
 usersRouter.get("/current", onlyLoggedInRest, getController);
-
-//   // @ts-ignore
-//   const usuario = await getDaoUsers
-//     // @ts-ignore
-//     .findOne({ email: req["user"].email }, { password: 0 })
-//     .lean();
-//   res.json({ status: "success", payload: usuario });
-// });
 
 // Update user password (PUT /api/users/resetpass)
 usersRouter.put("/resetpass", async function (req, res) {
@@ -67,21 +49,9 @@ usersRouter.put("/resetpass", async function (req, res) {
     // Hash the new password
     req.body.password = createHash(req.body.password);
 
-    // Update user password
-    // const updatedUser = await getDaoUsers.updateOne(
-    //   { email: req.body.email },
-    //   { $set: { password: req.body.password } },
-    //   { new: true }
-    // );
-
     // Adapt putController to handle password change specifically
     const updatedUser = await putController(req, res);
-    // Handle case where user does not exist
-    // if (!updatedUser) {
-    //   return res
-    //     .status(404)
-    //     .json({ status: "error", message: "user not found" });
-    // }
+    Logger.info("User password updated");
 
     // Successful response
     res.json({
@@ -91,6 +61,7 @@ usersRouter.put("/resetpass", async function (req, res) {
     });
   } catch (error) {
     // Handle errors
+    Logger.error("Error updating user password:", error);
     res.status(400).json({ status: "error", message: error.message });
   }
 });
@@ -119,16 +90,18 @@ usersRouter.put(
         { new: true }
       );
 
-      console.log(req.body.profile_picture);
+      Logger.info(req.body.profile_picture);
 
       // Handle case where user does not exist
       if (!updatedUser) {
+        Logger.warn("User not found for update:", { email: req.body.email });
         return res
           .status(404)
           .json({ status: "error", message: "user not found" });
       }
 
       // Successful response
+      Logger.info("User information updated:", { userId: updatedUser._id });
       res.json({
         status: "success",
         payload: updatedUser,
@@ -136,6 +109,7 @@ usersRouter.put(
       });
     } catch (error) {
       // Handle errors
+      Logger.error("Error updating user information:", error);
       res.status(400).json({ status: "error", message: error.message });
     }
   }

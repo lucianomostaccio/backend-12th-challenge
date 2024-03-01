@@ -1,4 +1,5 @@
 import { usersService } from "../services/index.js";
+import Logger from "../utils/logger.js";
 
 // all controllers use Service's functions. In this case, usersService
 
@@ -7,6 +8,7 @@ export async function getController(req, res, next) {
     const user = await usersService.getUserByEmail(req.user.email);
     res.status(200).json({ status: "success", payload: user });
   } catch (error) {
+    Logger.error("Error in getController:", error);
     next(error);
   }
 }
@@ -14,13 +16,13 @@ export async function getController(req, res, next) {
 // register
 export async function postController(req, res, next) {
   try {
-    console.log("entered postController");
+    Logger.debug("Entered postController");
     const user = await usersService.addUser(req.body);
-    console.log("user created by postController:", user);
+    Logger.info("User created by postController:", user);
     // res.result(user);
     res.created(user);
   } catch (error) {
-    console.error("Error in postController:", error);
+    Logger.error("Error in postController:", error); 
     next(error);
   }
 }

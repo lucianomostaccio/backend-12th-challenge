@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import { matches } from "../../utils.js";
+import Logger from "../../../utils/logger.js";
 
 export class ProductsDaoFiles {
   constructor(path) {
@@ -18,7 +19,7 @@ export class ProductsDaoFiles {
     const products = await this.#readProducts();
     products.push(newProduct);
     await this.#writeProducts(products);
-    console.log("Product created successfully:", newProduct); // Added logging
+    Logger.info("Product created successfully:", newProduct); // Added logging
     return newProduct;
   }
 

@@ -1,5 +1,6 @@
 import { Product } from "../models/products.model.js";
 import { getDaoProducts } from "../daos/products/products.dao.js";
+import Logger from "../utils/logger.js";
 
 const productsDao = getDaoProducts();
 
@@ -30,17 +31,17 @@ class ProductsService {
       const productToUpdate = await productsDao.readOne({ _id });
 
       if (!productToUpdate) {
-        console.error("Product not found for update");
+        Logger.warn("Product not found for update", { _id });
         return null;
       }
 
       Object.assign(productToUpdate, updatedProduct);
 
       await productsDao.updateOne({ _id }, productToUpdate);
-      console.log("Product updated:", productToUpdate);
+      Logger.info("Product updated:", productToUpdate);
       return productToUpdate;
     } catch (error) {
-      console.error("Error updating product:", error);
+      Logger.error("Error updating product:", error);
       throw error;
     }
   }
@@ -51,14 +52,14 @@ class ProductsService {
       const deletedProduct = await productsDao.deleteOne({ _id });
 
       if (deletedProduct) {
-        console.log("Product deleted:", deletedProduct);
+        Logger.info("Product deleted:", deletedProduct);
         return deletedProduct;
       } else {
-        console.error("Product not found for deletion");
+        Logger.error("Product not found for deletion");
         return null;
       }
     } catch (error) {
-      console.error("Error deleting product:", error);
+      Logger.error("Error deleting product:", error);
       throw error;
     }
   }

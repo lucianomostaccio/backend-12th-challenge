@@ -2,6 +2,7 @@
 
 import { User } from "../models/users.model.js";
 import { createHash } from "../utils/hashing.js";
+import Logger from "../utils/logger.js";
 
 export class UsersService {
   constructor({ usersDao, productsDao }) {
@@ -15,12 +16,11 @@ export class UsersService {
   }
 
   async addUser(data) {
-    console.log("entered addUser in users.service");
+    Logger.debug("entered addUser in users.service");
     const user = new User(data);
-    console.log("user (before toPOJO):", user); // Inspect directly
-    console.log("Data to be saved:", user.toPOJO()); // Examine after toPOJO
+    Logger.debug("user (before toPOJO):", user); // Inspect directly
+    Logger.debug("Data to be saved:", user.toPOJO()); // Examine after toPOJO
     await this.usersDao.create(user.toPOJO());
-    // console.log("Saved user:", savedUser);
     return user;
   }
 
@@ -33,6 +33,7 @@ export class UsersService {
       }
       return await user;
     } catch (error) {
+      Logger.error(`Error retrieving user by email: ${error.message}`);
       throw new Error(`Error retrieving user: ${error.message}`);
     }
   }
@@ -56,17 +57,17 @@ export class UsersService {
       const userToUpdate = await this.usersDao.readOne({ _id });
 
       if (!userToUpdate) {
-        console.error("User not found for update");
+        Logger.warn("User not found for update");
         return null;
       }
 
       Object.assign(userToUpdate, updatedUser);
 
       await this.usersDao.updateOne({ _id }, userToUpdate);
-      console.log("User updated:", userToUpdate);
+      Logger.info("User updated:", userToUpdate);
       return userToUpdate;
     } catch (error) {
-      console.error("Error updating user:", error);
+      Logger.error("Error updating user:", error);
       throw error;
     }
   }
@@ -91,14 +92,14 @@ export class UsersService {
       const deletedUser = await this.usersDao.deleteOne({ _id });
 
       if (deletedUser) {
-        console.log("User deleted:", deletedUser);
+        Logger.info("User deleted:", deletedUser);
         return deletedUser;
       } else {
-        console.error("User not found for deletion");
+        Logger.warn("User not found for deletion");
         return null;
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
+      Logger.error("Error deleting user:", error);
       throw error;
     }
   }
