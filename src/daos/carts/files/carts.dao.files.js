@@ -1,5 +1,6 @@
 import { promises } from "fs";
 import { join } from "path";
+import Logger from "../../../utils/logger";
 
 const PATH_CARTS_FILES = "../../../db/carts.json";
 const filePath = join(__dirname, PATH_CARTS_FILES);
@@ -30,9 +31,9 @@ export class CartManagerFiles {
     try {
       const data = JSON.stringify(this.carts, null, 2);
       await promises.writeFile(this.path, data, "utf8");
-      console.log("Carts guardados en el archivo correctamente.");
+      Logger.info("Carts guardados en el archivo correctamente.");
     } catch (err) {
-      console.error("Error al guardar los carts en el archivo:", err);
+      Logger.error("Error al guardar los carts en el archivo:", err);
     }
   }
   //agregar cart
@@ -51,7 +52,7 @@ export class CartManagerFiles {
     this.carts.push(newCart); 
     this.nextId++; //autogenerar el id sumando 1
     await this.saveCartsToFile(); //ejecutar la función para escribir el nuevo cart en el json
-    console.log("Cart agregado:", newCart);
+    Logger.debug("Cart agregado:", newCart);
   }
 
   //traer todos los carts 
@@ -63,7 +64,7 @@ export class CartManagerFiles {
   getCartById(id) {
     const cart = this.carts.find((cart) => cart.id === id);
     if (!cart) {
-      console.error("Cart no encontrado");
+      Logger.error("Cart no encontrado");
     } else {
       return cart;
     }
@@ -88,9 +89,9 @@ export class CartManagerFiles {
         });
       }
       await this.saveCartsToFile();
-      console.log("Producto agregado al carrito:", this.getCartById(cartId));
+      Logger.info("Producto agregado al carrito:", this.getCartById(cartId));
     } else {
-      console.error("Carrito no encontrado para agregar el producto");
+      Logger.error("Carrito no encontrado para agregar el producto");
     }
   }
 }

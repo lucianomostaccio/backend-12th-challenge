@@ -1,5 +1,6 @@
 // import { Cart } from "../../models/carts.model.js";
 import { getDaoCarts } from "../daos/carts/carts.dao.js";
+import Logger from "../utils/logger.js";
 
 const cartsDao = getDaoCarts();
 
@@ -13,9 +14,9 @@ class CartsService {
   async saveCartsToDatabase() {
     try {
       await cartsDao.insertMany();
-      console.log("Carts saved to the database successfully.");
+      Logger.info("Carts saved to the database successfully.");
     } catch (err) {
-      console.error("Error saving carts to the database:", err);
+      Logger.error("Error saving carts to the database:", err);
     }
   }
 
@@ -34,7 +35,7 @@ class CartsService {
     const cart = await cartsDao.readOne({ _id: cartId });
 
     if (!cart) {
-      console.error("Cart not found to add the product");
+      Logger.error("Cart not found to add the product");
       return null;
     }
 
@@ -54,7 +55,7 @@ class CartsService {
     }
 
     await cartsDao.updateOne({ _id: cartId }, cart);
-    console.log("Product added to the cart:", cart);
+    Logger.debug("Product added to the cart:", cart);
     return cart;
   }
 

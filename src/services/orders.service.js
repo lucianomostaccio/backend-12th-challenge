@@ -1,5 +1,6 @@
 // import { Order } from "../../models/orders.model.js";
 import { getDaoOrders } from "../daos/orders/orders.dao.js";
+import Logger from "../utils/logger.js";
 
 const ordersDao = getDaoOrders();
 
@@ -24,14 +25,14 @@ class OrdersService {
       const orderToUpdate = await ordersDao.readOne({ _id });
 
       if (!orderToUpdate) {
-        console.error("Order not found for update");
+        Logger.error("Order not found for update");
         return null;
       }
 
       Object.assign(orderToUpdate, updatedOrder);
 
       await ordersDao.updateOne({ _id }, orderToUpdate);
-      console.log("Order updated:", orderToUpdate);
+      Logger.info("Order updated:", orderToUpdate);
       return orderToUpdate;
     } catch (error) {
       console.error("Error updating order:", error);
@@ -45,7 +46,7 @@ class OrdersService {
       const deletedOrder = await ordersDao.deleteOne({ _id });
 
       if (deletedOrder) {
-        console.log("Order deleted:", deletedOrder);
+        Logger.info("Order deleted:", deletedOrder);
         return deletedOrder;
       } else {
         console.error("Order not found for deletion");
